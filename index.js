@@ -6,7 +6,6 @@ const path = require('path')
 let loading
 let VSCwin
 let page
-let loggedin
 let loginWin
 
 // Create the RPC
@@ -39,7 +38,7 @@ rpc.on('ready', () => {
 
   // Every 100ms, check if the file changed
   setInterval(async () => {
-    if(!VSCwin) return
+    if (!VSCwin) return
     // Check if its logging in or still starting
     if (getTitle()?.split(' ')[0] === 'code-server') {
       // If its already done this, return
@@ -84,8 +83,13 @@ rpc.on('ready', () => {
 })
 
 app.whenReady().then(async () => {
+  // Get screen size
+  let { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  width = parseInt(0.37 * width)
+  height = parseInt(0.12 * height)
+
   // Create the window to ask for URL, show it when ready
-  const win = new BrowserWindow({ width: 700, height: 100, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  const win = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   win.setMenu(null)
   win.loadURL('file://' + path.join(__dirname, 'static/page.html'))
   win.once('ready-to-show', () => { win.show() })
@@ -97,9 +101,6 @@ app.whenReady().then(async () => {
 
     // close the indow
     win.close()
-
-    // Get screen size
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize
 
     // Create the code-server window with the correct size, then show it
     VSCwin = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { contextIsolation: false } })
@@ -113,7 +114,7 @@ app.whenReady().then(async () => {
 
     // When it is closed, quit the app
     VSCwin.on('close', (e) => {
-      VSCwin = null;
+      VSCwin = null
       app.quit()
     })
   })
@@ -128,25 +129,31 @@ app.on('window-all-closed', async (e) => {
 
 // When it asks for basic-auth
 app.on('login', (event, webContents, request, authInfo, callback) => {
+  // Get screen size
+  let { width, height } = screen.getPrimaryDisplay().workAreaSize
+  width = parseInt(0.27 * width)
+  height = parseInt(0.18 * height)
+
   // Stop some random shit from happening
   event.preventDefault()
 
+
   // Create the window to ask for username and password, show it when ready
-  loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  loginWin = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   loginWin.setMenu(null)
   loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'))
   loginWin.once('ready-to-show', () => { loginWin.show() })
 
   loginWin.on('close', () => {
-    loginWin = null;
+    loginWin = null
   })
 
   // When the ipcMain gets login event
   ipcMain.once('login', (e, details) => {
     // Close the window and set it to null
     if (loginWin) {
-      loginWin.close();
-      loginWin = null;
+      loginWin.close()
+      loginWin = null
     }
 
     // Call the callback
