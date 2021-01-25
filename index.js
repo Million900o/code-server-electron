@@ -2,9 +2,6 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron')
 const DiscordRPC = require('discord-rpc')
 const path = require('path')
 
-// The join char, apple is strange
-const defaultChar = process.platform === 'darwin' ? '—' : '-'
-
 // define "global" variables
 let loading
 let VSCwin
@@ -28,7 +25,7 @@ const setActivity = async (text, date = new Date()) => {
 }
 
 // Function to get the title of the page
-const getTitle = () => VSCwin?.title.split(` ${defaultChar}`)[0]
+const getTitle = () => VSCwin?.title.split(/ —| -/g)[0]
 
 rpc.on('ready', () => {
   // Fancy logs
