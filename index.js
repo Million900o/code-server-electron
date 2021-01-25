@@ -70,7 +70,7 @@ app.whenReady().then(async () => {
 
   // When the main IPC gets "url:save" event
   ipcMain.on('url:save', async (e, url) => {
-    // Add a / to the end of the URL if it doesn't  have one
+    // Add a / to the end of the URL if it doesn't have one
     page = url.endsWith('/') ? url : url + '/'
 
     // close the indow

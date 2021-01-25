@@ -1,5 +1,6 @@
-# Discord code-server RPC
+# code-server-electron
 
-Get Discord RPC control by launching code-server through this electron app.
+code-server "wrapper" in electron.
+Enables Discord status on code-server.
 
 > Only tested on MacOS
