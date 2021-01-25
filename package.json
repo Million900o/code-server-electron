@@ -1,0 +1,31 @@
+{
+  "name": "code-server",
+  "version": "0.0.2",
+  "description": "h",
+  "main": "index.js",
+  "dependencies": {
+    "discord-rpc": "^3.1.4",
+    "electron-settings": "^4.0.2"
+  },
+  "devDependencies": {
+    "electron": "11.2.1",
+    "electron-packager": "^15.2.0"
+  },
+  "scripts": {
+    "test": "electron .",
+    "package": "electron-packager . --overwrite --icon=assets/icon.icns --prune=true --out=release-builds"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Million900o/code-server-status.git"
+  },
+  "keywords": [
+    "code-server"
+  ],
+  "author": "MILLION",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Million900o/code-server-status/issues"
+  },
+  "homepage": "https://github.com/Million900o/code-server-status#readme"
+}
