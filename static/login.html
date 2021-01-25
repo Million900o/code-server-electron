@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Login</title>
+</head>
+
+<body>
+  <style>
+    * {
+      background-color: rgb(26, 26, 26)
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      background: rgb(37, 37, 37);
+      color: rgb(197, 197, 197);
+      border: 1px solid rgb(20, 20, 20);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    div {
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+  </style>
+  <form id="form">
+    <input type="text" name="uname" id="username">
+    <input type="password" name="pword" id="password">
+  </form>
+  <script>
+    const { ipcRenderer } = require("electron")
+
+    document.getElementById('password').onkeypress = function (e) {
+      if (!e) e = window.event;
+      var keyCode = e.code || e.key;
+      if (keyCode == 'Enter') {
+        return submit();
+      }
+    }
+
+    const uname = document.getElementById('password').value
+    const pword = document.getElementById('password').value
+
+    const submit = e => {
+      e?.preventDefault()
+      ipcRenderer.send('login', { username: uname, password: pword })
+    }
+
+    (document.getElementById('form') || {}).onsubmit = submit
+  </script>
+</body>

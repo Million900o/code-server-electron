@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron')
+const { app, BrowserWindow, ipcMain, screen, Notification } = require('electron')
 const DiscordRPC = require('discord-rpc')
-const path = require('path')
+const path = require('path');
 
 // define "global" variables
 let loading
@@ -25,7 +25,7 @@ const setActivity = async (text, date = new Date()) => {
 }
 
 // Function to get the title of the page
-const getTitle = () => VSCwin?.title.split(/ —| -/g)[0]
+const getTitle = () => (VSCwin || {}).title.split(/ —| -/g)[0].toString();
 
 rpc.on('ready', () => {
   // Fancy logs
@@ -37,9 +37,33 @@ rpc.on('ready', () => {
 
   // Every 100ms, check if the file changed
   setInterval(async () => {
-    // If no window and isn't already loading, or the title is "code-server" set activity to loading
-    if ((!VSCwin && !loading) || getTitle().split(' ')[0] === 'code-server') {
+    // Check if its logging in or still starting
+    if (getTitle()?.split(' ')[0] === 'code-server') {
+      // If its already done this, return
+      if (loading) return;
+
+      // Make it so it knows if its done it
+      loading = true;
+      
+      // Set before to the title
+      before = getTitle();
+
+      // Set the status to logging in
+      await setActivity('Logging in', new Date());
+      return
+    }
+
+    if (!VSCwin) {
+      // If it is already loading, return
+      if (loading) return
+
+      // Make it so it is loading
       loading = true
+
+      // Set before to the title
+      before = getTitle()
+
+      // Set the activity to loading
       await setActivity('Loading...', new Date())
       return
     }
@@ -57,9 +81,6 @@ rpc.on('ready', () => {
 })
 
 app.whenReady().then(async () => {
-  // Login to the RPC
-  rpc.login({ clientId: '802641162115612682' })
-
   // Create the window to ask for URL, show it when ready
   const win = new BrowserWindow({ width: 700, height: 100, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   win.loadURL('file://' + path.join(__dirname, 'static/page.html'))
@@ -79,7 +100,11 @@ app.whenReady().then(async () => {
     // Create the code-server window with the correct size, then show it
     VSCwin = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { contextIsolation: false } })
     VSCwin.loadURL(page)
-    VSCwin.once('ready-to-show', () => { VSCwin.show() })
+    VSCwin.once('ready-to-show', () => {
+      // Login to the RPC
+      rpc.login({ clientId: '802641162115612682' })
+      VSCwin.show();
+    })
 
     // When it is closed, quit the app
     VSCwin.on('close', (e) => {
@@ -93,4 +118,27 @@ app.whenReady().then(async () => {
 // BEFORE the VSC window will open
 app.on('window-all-closed', async (e) => {
   e.preventDefault()
+})
+
+// When it asks for basic-auth
+app.on('login', (event, webContents, request, authInfo, callback) => {
+  // Stop some random shit from happening
+  event.preventDefault();
+
+  // Create the window to ask for username and password, show it when ready
+  const loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } });
+  loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'));
+  loginWin.once('ready-to-show', () => { loginWin.show(); })
+
+  // When the ipcMain gets login event
+  ipcMain.on('login', (e, details) => {
+    loginWin.close()
+    callback(details.username, details.password)
+  })
+});
+
+// If it errors, catch the error
+process.on('uncaughtException', (err) => {
+  // Create a notification with the error
+  new Notification({ title: 'Error', body: err.toString() }).show();
 })
