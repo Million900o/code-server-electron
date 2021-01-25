@@ -34,12 +34,8 @@
   <script>
     const { ipcRenderer } = require("electron");
 
-    const submit = e => {
-      console.log(document.getElementById('h').value)
-      e?.preventDefault();
+    document.getElementById('form').onsubmit = e => {
       ipcRenderer.send('url:save', document.getElementById('h').value)
     }
-
-    (document.getElementById('form') || {}).onsubmit = submit;
   </script>
 </body>

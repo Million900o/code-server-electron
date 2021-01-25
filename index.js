@@ -86,6 +86,7 @@ rpc.on('ready', () => {
 app.whenReady().then(async () => {
   // Create the window to ask for URL, show it when ready
   const win = new BrowserWindow({ width: 700, height: 100, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  win.setMenu(null)
   win.loadURL('file://' + path.join(__dirname, 'static/page.html'))
   win.once('ready-to-show', () => { win.show() })
 
@@ -102,6 +103,7 @@ app.whenReady().then(async () => {
 
     // Create the code-server window with the correct size, then show it
     VSCwin = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { contextIsolation: false } })
+    VSCwin.setMenu(null)
     VSCwin.loadURL(page)
     VSCwin.once('ready-to-show', () => {
       // Login to the RPC
@@ -131,6 +133,7 @@ app.on('login', (event, webContents, request, authInfo, callback) => {
 
   // Create the window to ask for username and password, show it when ready
   loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  loginWin.setMenu(null)
   loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'))
   loginWin.once('ready-to-show', () => { loginWin.show() })
 
