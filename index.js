@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, screen, Notification } = require('electron')
 const DiscordRPC = require('discord-rpc')
-const path = require('path');
+const path = require('path')
 
 // define "global" variables
 let loading
@@ -25,7 +25,7 @@ const setActivity = async (text, date = new Date()) => {
 }
 
 // Function to get the title of the page
-const getTitle = () => (VSCwin || {}).title.split(/ —| -/g)[0].toString();
+const getTitle = () => (VSCwin || {}).title.split(/ —| -/g)[0].toString()
 
 rpc.on('ready', () => {
   // Fancy logs
@@ -40,16 +40,16 @@ rpc.on('ready', () => {
     // Check if its logging in or still starting
     if (getTitle()?.split(' ')[0] === 'code-server') {
       // If its already done this, return
-      if (loading) return;
+      if (loading) return
 
       // Make it so it knows if its done it
-      loading = true;
-      
+      loading = true
+
       // Set before to the title
-      before = getTitle();
+      before = getTitle()
 
       // Set the status to logging in
-      await setActivity('Logging in', new Date());
+      await setActivity('Logging in', new Date())
       return
     }
 
@@ -103,7 +103,7 @@ app.whenReady().then(async () => {
     VSCwin.once('ready-to-show', () => {
       // Login to the RPC
       rpc.login({ clientId: '802641162115612682' })
-      VSCwin.show();
+      VSCwin.show()
     })
 
     // When it is closed, quit the app
@@ -123,22 +123,22 @@ app.on('window-all-closed', async (e) => {
 // When it asks for basic-auth
 app.on('login', (event, webContents, request, authInfo, callback) => {
   // Stop some random shit from happening
-  event.preventDefault();
+  event.preventDefault()
 
   // Create the window to ask for username and password, show it when ready
-  const loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } });
-  loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'));
-  loginWin.once('ready-to-show', () => { loginWin.show(); })
+  const loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'))
+  loginWin.once('ready-to-show', () => { loginWin.show() })
 
   // When the ipcMain gets login event
   ipcMain.on('login', (e, details) => {
     loginWin.close()
     callback(details.username, details.password)
   })
-});
+})
 
 // If it errors, catch the error
 process.on('uncaughtException', (err) => {
   // Create a notification with the error
-  new Notification({ title: 'Error', body: err.toString() }).show();
+  new Notification({ title: 'Error', body: err.toString() }).show()
 })
