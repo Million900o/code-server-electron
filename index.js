@@ -85,11 +85,11 @@ rpc.on('ready', () => {
 app.whenReady().then(async () => {
   // Get screen size
   let { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  width = parseInt(0.37 * width)
-  height = parseInt(0.12 * height)
+  winWidth = parseInt(0.37 * width)
+  winHeight = parseInt(0.12 * height)
 
   // Create the window to ask for URL, show it when ready
-  const win = new BrowserWindow({ width: width, height: height, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  const win = new BrowserWindow({ width: winWidth, height: winHeight, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   win.setMenu(null)
   win.loadURL('file://' + path.join(__dirname, 'static/page.html'))
   win.once('ready-to-show', () => { win.show() })
