@@ -26,7 +26,7 @@ const setActivity = async (text, date = new Date()) => {
 }
 
 // Function to get the title of the page
-const getTitle = () => VSCwin ? VSCwin.title.split(/ —| -/g)[0].toString() : 'code-server'
+const getTitle = () => VSCwin ? VSCwin.title.split(/ —| -/g)[0].toString().replace(/●/g, '') : 'code-server'
 
 rpc.on('ready', () => {
   // Fancy logs
