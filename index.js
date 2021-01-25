@@ -6,6 +6,8 @@ const path = require('path')
 let loading
 let VSCwin
 let page
+let loggedin
+let loginWin
 
 // Create the RPC
 const rpc = new DiscordRPC.Client({ transport: 'ipc' })
@@ -25,7 +27,7 @@ const setActivity = async (text, date = new Date()) => {
 }
 
 // Function to get the title of the page
-const getTitle = () => (VSCwin || {}).title.split(/ —| -/g)[0].toString()
+const getTitle = () => VSCwin ? VSCwin.title.split(/ —| -/g)[0].toString() : 'code-server'
 
 rpc.on('ready', () => {
   // Fancy logs
@@ -37,6 +39,7 @@ rpc.on('ready', () => {
 
   // Every 100ms, check if the file changed
   setInterval(async () => {
+    if(!VSCwin) return
     // Check if its logging in or still starting
     if (getTitle()?.split(' ')[0] === 'code-server') {
       // If its already done this, return
@@ -108,6 +111,7 @@ app.whenReady().then(async () => {
 
     // When it is closed, quit the app
     VSCwin.on('close', (e) => {
+      VSCwin = null;
       app.quit()
     })
   })
@@ -126,19 +130,23 @@ app.on('login', (event, webContents, request, authInfo, callback) => {
   event.preventDefault()
 
   // Create the window to ask for username and password, show it when ready
-  const loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
+  loginWin = new BrowserWindow({ width: 500, height: 155, show: false, darkTheme: true, webPreferences: { nodeIntegration: true, contextIsolation: false } })
   loginWin.loadURL('file://' + path.join(__dirname, 'static/login.html'))
   loginWin.once('ready-to-show', () => { loginWin.show() })
 
+  loginWin.on('close', () => {
+    loginWin = null;
+  })
+
   // When the ipcMain gets login event
-  ipcMain.on('login', (e, details) => {
-    loginWin.close()
+  ipcMain.once('login', (e, details) => {
+    // Close the window and set it to null
+    if (loginWin) {
+      loginWin.close();
+      loginWin = null;
+    }
+
+    // Call the callback
     callback(details.username, details.password)
   })
-})
-
-// If it errors, catch the error
-process.on('uncaughtException', (err) => {
-  // Create a notification with the error
-  new Notification({ title: 'Error', body: err.toString() }).show()
 })
