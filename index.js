@@ -12,7 +12,7 @@ let loginWin
 const rpc = new DiscordRPC.Client({ transport: 'ipc' })
 
 // The function to change status
-const setActivity = async (text, date = new Date()) => {
+const setActivity = async (text, folder, date = new Date()) => {
   // Log the status update
   console.log('DEBUG | status updated')
 
@@ -21,12 +21,13 @@ const setActivity = async (text, date = new Date()) => {
     details: text,
     largeImageKey: 'vscode',
     largeImageText: 'Visual Studio Code',
-    startTimestamp: date
+    startTimestamp: date,
+    state: folder ? `Folder: ${folder}` : undefined
   })
 }
 
 // Function to get the title of the page
-const getTitle = () => VSCwin ? VSCwin.title.split(/ —| -/g)[0].toString().replace(/●/g, '') : 'code-server'
+const getTitleArray = () => VSCwin ? VSCwin.title.split(/ —| -/g).map(e => e.toString().replace(/●/g, '')) : ['code-server']
 
 rpc.on('ready', () => {
   // Fancy logs
@@ -34,13 +35,13 @@ rpc.on('ready', () => {
   console.log(` LOG  | Logged in as ${rpc.user.username}`)
 
   // Get the before one.
-  let before = getTitle()
+  let before = getTitleArray()[0]
 
   // Every 100ms, check if the file changed
   setInterval(async () => {
     if (!VSCwin) return
     // Check if its logging in or still starting
-    if (getTitle()?.split(' ')[0] === 'code-server') {
+    if (getTitleArray[0] === 'code-server') {
       // If its already done this, return
       if (loading) return
 
@@ -48,10 +49,10 @@ rpc.on('ready', () => {
       loading = true
 
       // Set before to the title
-      before = getTitle()
+      before = getTitleArray()[0] || 'none'
 
       // Set the status to logging in
-      await setActivity('Logging in', new Date())
+      await setActivity('Logging in', 'none', new Date())
       return
     }
 
@@ -63,21 +64,21 @@ rpc.on('ready', () => {
       loading = true
 
       // Set before to the title
-      before = getTitle()
+      before = getTitleArray()[0]
 
       // Set the activity to loading
-      await setActivity('Loading...', new Date())
+      await setActivity('Loading...', getTitleArray[1], new Date())
       return
     }
 
     // If the title changed
-    if (getTitle() !== before) {
+    if (getTitleArray()[0] !== before) {
       // Reset loading and before
       loading = false
-      before = getTitle()
+      before = getTitleArray()[0]
 
       // Set the activity to the file
-      await setActivity(`File: ${getTitle()}`)
+      await setActivity(`File: ${getTitleArray()[0]}`, getTitleArray()[1] || 'none')
     }
   }, 100)
 })
